@@ -22,7 +22,25 @@ CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS todos (
+    id       TEXT PRIMARY KEY,
+    card_id  TEXT NOT NULL,
+    text     TEXT NOT NULL DEFAULT '',
+    done     INTEGER DEFAULT 0,
+    position INTEGER DEFAULT 0,
+    FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
+);
 """
+
+
+def migrate_if_needed(conn: sqlite3.Connection):
+    """检测并迁移: 为已有数据库添加 is_completed 列."""
+    cursor = conn.execute("PRAGMA table_info(cards)")
+    columns = {row["name"] for row in cursor.fetchall()}
+    if "is_completed" not in columns:
+        conn.execute("ALTER TABLE cards ADD COLUMN is_completed INTEGER DEFAULT 0")
+        conn.commit()
 
 
 class Database:
@@ -42,6 +60,7 @@ class Database:
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA_SQL)
+        migrate_if_needed(self.conn)
         self.conn.commit()
         return self.conn
 
