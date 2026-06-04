@@ -3,11 +3,12 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QIcon, QAction, QKeySequence
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 
+from cardnote.utils.helpers import resource_path
+
 
 def _load_icon() -> QIcon:
     """加载卡片图标，从文件路径加载 SVG."""
-    icon_path = os.path.join(os.path.dirname(__file__), "..",
-                             "ui", "resources", "icons", "card.svg")
+    icon_path = resource_path(os.path.join("ui", "resources", "icons", "card.svg"))
     if os.path.exists(icon_path):
         return QIcon(icon_path)
     # fallback: 使用系统内置图标

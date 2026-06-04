@@ -9,6 +9,7 @@ from cardnote.db.repository import CardRepository
 from cardnote.app.settings import Settings
 from cardnote.app.card_manager import CardManager
 from cardnote.app.tray import CardTray
+from cardnote.utils.helpers import resource_path
 
 
 class CardNoteApp:
@@ -78,8 +79,7 @@ class CardNoteApp:
 
     def _apply_theme(self):
         theme_file = "dark.qss" if self._is_dark else "light.qss"
-        qss_path = os.path.join(os.path.dirname(__file__), "..",
-                                "ui", "resources", "styles", theme_file)
+        qss_path = resource_path(os.path.join("ui", "resources", "styles", theme_file))
         if os.path.exists(qss_path):
             with open(qss_path, "r", encoding="utf-8") as f:
                 self.qapp.setStyleSheet(f.read())
