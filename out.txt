@@ -1,9 +1,0 @@
-============================= test session starts =============================
-platform win32 -- Python 3.14.5, pytest-9.0.3, pluggy-1.6.0 -- D:\python14\python.exe
-cachedir: .pytest_cache
-PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
-rootdir: D:\Ai-tool\0604
-plugins: qt-4.5.0
-collecting ... collected 1 item
-
-cardnote/tests/test_card_manager.py::TestCardManager::test_create_card FAILED [100%]
