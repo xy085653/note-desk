@@ -116,13 +116,14 @@ class TodoRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def add_todo(self, card_id: str, text: str = "") -> dict:
+    def add_todo(self, card_id: str, text: str = "",
+                 todo_id: str | None = None, done: bool = False) -> dict:
         from cardnote.utils.helpers import new_uuid
         todo = {
-            "id": new_uuid(),
+            "id": todo_id or new_uuid(),
             "card_id": card_id,
             "text": text,
-            "done": 0,
+            "done": 1 if done else 0,
             "position": self._next_position(card_id),
         }
         self.conn.execute(

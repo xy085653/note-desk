@@ -58,7 +58,7 @@ class CardManager(QObject):
         return card
 
     def _save_card(self, card_id: str):
-        """保存卡片当前状态到数据库."""
+        """保存卡片当前状态到数据库，包括待办项."""
         card = self.cards.get(card_id)
         if card is None:
             return
@@ -68,6 +68,11 @@ class CardManager(QObject):
         self.repository.update_size(card_id, data["width"], data["height"])
         self.repository.update_color_scheme(card_id, data.get("color_scheme", 0))
         self.repository.set_card_completed(card_id, bool(data.get("is_completed", 0)))
+        # 同步待办项：删除旧数据，用当前 UI 中的数据替换
+        todos = card.card_widget.get_all_todos()
+        self.todo_repo.delete_card_todos(card_id)
+        for t in todos:
+            self.todo_repo.add_todo(card_id, t["text"], todo_id=t["id"], done=t["done"])
 
     def _on_delete_requested(self, card_id: str):
         """处理卡片删除请求: 播放动画后自动触发 delete_card."""
