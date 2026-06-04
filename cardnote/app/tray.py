@@ -11,6 +11,7 @@ class CardTray(QObject):
     hide_all_requested = Signal()
     toggle_theme_requested = Signal()
     quit_requested = Signal()
+    tray_clicked = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -59,12 +60,10 @@ class CardTray(QObject):
 
     def _on_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
-            if hasattr(self, 'parent') and hasattr(self.parent(), 'card_manager'):
-                self.parent().card_manager.toggle_visible()
+            self.tray_clicked.emit()
 
     def set_theme_label(self, is_dark: bool):
-        action = self.tray_icon.contextMenu().actions()[4]  # theme action
-        action.setText("☀️ 日间模式" if is_dark else "🌙 夜间模式")
+        self.act_theme.setText("☀️ 日间模式" if is_dark else "🌙 夜间模式")
 
     def set_tooltip(self, count: int):
         self.tray_icon.setToolTip(f"CardNote - {count} 张卡片")

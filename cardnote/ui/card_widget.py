@@ -21,8 +21,6 @@ class CardWidget(QWidget):
         self.text_edit.textChanged.connect(self._on_text_changed)
         layout.addWidget(self.text_edit)
 
-        self._debounce_timer = None
-
     def _on_text_changed(self):
         content = self.text_edit.toPlainText()
         self.content_changed.emit(content)

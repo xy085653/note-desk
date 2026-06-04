@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal, QPropertyAnimation, QRect, QEasingCurve, QPoint
+from PySide6.QtCore import Qt, Signal, QPropertyAnimation, QRect, QEasingCurve, QPoint, QAbstractAnimation
 from PySide6.QtGui import QPainter, QColor, QLinearGradient, QBrush, QPainterPath
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMenu, QSizeGrip
 
@@ -240,3 +240,9 @@ class FloatingCard(QWidget):
             self._delete_callback()
         else:
             self.close()
+
+    def closeEvent(self, event):
+        """处理 Alt+F4 或系统关闭: 通知 CardManager 进行清理."""
+        if not self._delete_animation or self._delete_animation.state() == QAbstractAnimation.Stopped:
+            self.delete_requested.emit(self.card_id)
+        super().closeEvent(event)
