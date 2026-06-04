@@ -34,6 +34,7 @@ class TodoItem(QWidget):
         self.text_edit.setPlaceholderText("输入待办事项...")
         self.text_edit.setAttribute(Qt.WA_TranslucentBackground)
         self.text_edit.setAutoFillBackground(False)
+        self.text_edit.setStyleSheet("background: transparent; border: none;")
         self.text_edit.editingFinished.connect(self._on_text_changed)
         if done:
             self._apply_done_style()

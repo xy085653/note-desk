@@ -99,10 +99,16 @@ class FloatingCard(QWidget):
 
         main_layout.addWidget(self.content_widget)
 
-        # 大小缩放把手 — 直接挂在 FloatingCard 上，固定在右下角
+        # 大小缩放把手 — 透明不可见，固定在右下角功能区
         self.size_grip = QSizeGrip(self)
-        self.size_grip.resize(20, 20)
+        self.size_grip.resize(16, 16)
         self.size_grip.setCursor(Qt.SizeFDiagCursor)
+        self.size_grip.setStyleSheet("""
+            QSizeGrip {
+                background: transparent;
+                border: none;
+            }
+        """)
         self._position_size_grip()
 
         # 待办项变化时自适应高度
