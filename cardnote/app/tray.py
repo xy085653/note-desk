@@ -45,6 +45,7 @@ class CardTray(QObject):
     show_all_requested = Signal()
     hide_all_requested = Signal()
     toggle_theme_requested = Signal()
+    toggle_startup_requested = Signal()
     quit_requested = Signal()
     tray_clicked = Signal()
 
@@ -83,6 +84,10 @@ class CardTray(QObject):
         self.act_theme.triggered.connect(self.toggle_theme_requested.emit)
         menu.addAction(self.act_theme)
 
+        self.act_startup = QAction("⚡ 开机自启")
+        self.act_startup.triggered.connect(self.toggle_startup_requested.emit)
+        menu.addAction(self.act_startup)
+
         menu.addSeparator()
 
         self.act_quit = QAction("❌ 退出")
@@ -97,6 +102,9 @@ class CardTray(QObject):
 
     def set_theme_label(self, is_dark: bool):
         self.act_theme.setText("☀️ 日间模式" if is_dark else "🌙 夜间模式")
+
+    def set_startup_label(self, enabled: bool):
+        self.act_startup.setText("✅ 开机自启" if enabled else "⚡ 开机自启")
 
     def set_tooltip(self, count: int):
         self.tray_icon.setToolTip(f"CardNote - {count} 张卡片")

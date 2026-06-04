@@ -9,7 +9,7 @@ from cardnote.db.repository import CardRepository
 from cardnote.app.settings import Settings
 from cardnote.app.card_manager import CardManager
 from cardnote.app.tray import CardTray
-from cardnote.utils.helpers import resource_path
+from cardnote.utils.helpers import resource_path, is_auto_start_enabled, set_auto_start
 
 
 class CardNoteApp:
@@ -42,6 +42,11 @@ class CardNoteApp:
         self._is_dark = self.settings.get("theme") == "dark"
         self._apply_theme()
 
+        # 开机自启（默认开启）
+        startup = self.settings.get_bool("launch_at_startup")
+        set_auto_start(startup)
+        self.tray.set_startup_label(startup)
+
         # 全局快捷键
         self._setup_shortcuts()
 
@@ -50,6 +55,7 @@ class CardNoteApp:
         self.tray.show_all_requested.connect(self.card_manager.show_all)
         self.tray.hide_all_requested.connect(self.card_manager.hide_all)
         self.tray.toggle_theme_requested.connect(self._toggle_theme)
+        self.tray.toggle_startup_requested.connect(self._toggle_startup)
         self.tray.tray_clicked.connect(self.card_manager.toggle_visible)
         self.tray.quit_requested.connect(self._quit)
         self.card_manager.card_count_changed.connect(self.tray.set_tooltip)
@@ -76,6 +82,12 @@ class CardNoteApp:
         self.settings.set("theme", "dark" if self._is_dark else "light")
         self._apply_theme()
         self.tray.set_theme_label(self._is_dark)
+
+    def _toggle_startup(self):
+        enabled = not is_auto_start_enabled()
+        set_auto_start(enabled)
+        self.settings.set("launch_at_startup", "true" if enabled else "false")
+        self.tray.set_startup_label(enabled)
 
     def _apply_theme(self):
         theme_file = "dark.qss" if self._is_dark else "light.qss"

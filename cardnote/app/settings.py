@@ -1,7 +1,7 @@
 DEFAULTS = {
     "theme": "light",
     "auto_theme": "false",
-    "launch_at_startup": "false",
+    "launch_at_startup": "true",
     "default_card_width": "260",
     "default_card_height": "260",
 }
