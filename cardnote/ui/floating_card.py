@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt, Signal, QPropertyAnimation, QRect, QEasingCurve, QPoint, QAbstractAnimation
 from PySide6.QtGui import QPainter, QColor, QLinearGradient, QBrush, QPainterPath
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMenu, QSizeGrip
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMenu, QSizeGrip, QCheckBox
 
 from cardnote.ui.card_widget import CardWidget
 from cardnote.ui.color_schemes import get_scheme, SCHEMES
@@ -48,6 +48,10 @@ class FloatingCard(QWidget):
         self._build_ui()
         self._setup_menu()
 
+        # 如果数据库标记已完成，应用样式
+        if bool(self.card_data.get("is_completed", 0)):
+            self._apply_completed_style()
+
     def _build_ui(self):
         # 主布局
         main_layout = QVBoxLayout(self)
@@ -67,11 +71,17 @@ class FloatingCard(QWidget):
         title_bar.setFixedHeight(self.TITLE_BAR_HEIGHT)
         title_bar.setObjectName("titleBar")
         title_layout = QHBoxLayout(title_bar)
-        title_layout.setContentsMargins(12, 0, 4, 0)
+        title_layout.setContentsMargins(8, 0, 4, 0)
+
+        self.complete_check = QCheckBox()
+        self.complete_check.setFixedWidth(20)
+        completed = bool(self.card_data.get("is_completed", 0))
+        self.complete_check.setChecked(completed)
+        self.complete_check.toggled.connect(self._on_completed_toggled)
+        title_layout.addWidget(self.complete_check)
 
         self.pin_label = QLabel("📌")
         self.pin_label.setFixedWidth(24)
-
         title_layout.addWidget(self.pin_label)
         title_layout.addStretch()
 
@@ -114,6 +124,27 @@ class FloatingCard(QWidget):
                 background: transparent;
             }}
         """)
+
+    def _on_completed_toggled(self, checked: bool):
+        """整卡完成状态切换."""
+        self.card_data["is_completed"] = 1 if checked else 0
+        if checked:
+            self._apply_completed_style()
+        else:
+            self._remove_completed_style()
+        self._emit_save()
+
+    def _apply_completed_style(self):
+        """卡片完成：半透明 + 删除线."""
+        self.setWindowOpacity(0.55)
+        self.card_widget.text_edit.setStyleSheet(
+            "color: #888888; text-decoration: line-through;"
+        )
+
+    def _remove_completed_style(self):
+        """恢复卡片正常样式."""
+        self.setWindowOpacity(1.0)
+        self.card_widget.text_edit.setStyleSheet("")
 
     def _setup_menu(self):
         self.context_menu = QMenu(self)
