@@ -1,6 +1,6 @@
 from PySide6.QtCore import QObject, Signal, QTimer
 
-from cardnote.db.repository import CardRepository
+from cardnote.db.repository import CardRepository, TodoRepository
 from cardnote.ui.floating_card import FloatingCard
 
 
@@ -14,6 +14,7 @@ class CardManager(QObject):
     def __init__(self, repository: CardRepository, parent=None):
         super().__init__(parent)
         self.repository = repository
+        self.todo_repo = TodoRepository(repository.conn)
         self.cards: dict[str, FloatingCard] = {}
         self._save_timers: dict[str, QTimer] = {}
         self._debounce_ms = 3000
@@ -43,6 +44,15 @@ class CardManager(QObject):
         card.card_widget.content_changed.connect(
             lambda text: self._debounce_save(card.card_id, text)
         )
+        # Todo 信号连接
+        card.card_widget.set_card_id(data["id"])
+        card.card_widget.todo_added.connect(lambda cid: self._save_card(cid))
+        card.card_widget.todo_toggled.connect(lambda tid, d: self._on_todo_toggled(tid, d))
+        card.card_widget.todo_text_changed.connect(lambda tid, t: self._on_todo_text_changed(tid, t))
+        card.card_widget.todo_deleted.connect(lambda tid: self._on_todo_deleted(tid))
+        # 加载待办项
+        todos = self.todo_repo.get_todos(data["id"])
+        card.card_widget.load_todos(todos)
         card.show()
         self.cards[data["id"]] = card
         return card
@@ -57,6 +67,7 @@ class CardManager(QObject):
         self.repository.update_position(card_id, data["pos_x"], data["pos_y"])
         self.repository.update_size(card_id, data["width"], data["height"])
         self.repository.update_color_scheme(card_id, data.get("color_scheme", 0))
+        self.repository.set_card_completed(card_id, bool(data.get("is_completed", 0)))
 
     def _on_delete_requested(self, card_id: str):
         """处理卡片删除请求: 播放动画后自动触发 delete_card."""
@@ -65,6 +76,15 @@ class CardManager(QObject):
             card._animate_delete()
         else:
             self.delete_card(card_id)
+
+    def _on_todo_toggled(self, todo_id: str, done: bool):
+        self.todo_repo.toggle_todo(todo_id)
+
+    def _on_todo_text_changed(self, todo_id: str, text: str):
+        self.todo_repo.update_todo(todo_id, text)
+
+    def _on_todo_deleted(self, todo_id: str):
+        self.todo_repo.delete_todo(todo_id)
 
     def _debounce_save(self, card_id: str, text: str):
         """防抖保存: 内容变化后 3s 自动保存."""
@@ -87,6 +107,7 @@ class CardManager(QObject):
         if card_id in self._save_timers:
             self._save_timers[card_id].stop()
             del self._save_timers[card_id]
+        self.todo_repo.delete_card_todos(card_id)
         self.repository.soft_delete(card_id)
         self.card_deleted.emit(card_id)
         self.card_count_changed.emit(len(self.cards))
