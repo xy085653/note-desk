@@ -81,7 +81,7 @@ class CardNoteApp:
         qss_path = os.path.join(os.path.dirname(__file__), "..",
                                 "ui", "resources", "styles", theme_file)
         if os.path.exists(qss_path):
-            with open(qss_path, "r") as f:
+            with open(qss_path, "r", encoding="utf-8") as f:
                 self.qapp.setStyleSheet(f.read())
         else:
             self.qapp.setStyleSheet("")

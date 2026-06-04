@@ -1,6 +1,17 @@
+import os
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QIcon, QAction, QKeySequence
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
+
+
+def _load_icon() -> QIcon:
+    """加载卡片图标，从文件路径加载 SVG."""
+    icon_path = os.path.join(os.path.dirname(__file__), "..",
+                             "ui", "resources", "icons", "card.svg")
+    if os.path.exists(icon_path):
+        return QIcon(icon_path)
+    # fallback: 使用系统内置图标
+    return QIcon.fromTheme("accessory-text-editor")
 
 
 class CardTray(QObject):
@@ -16,9 +27,7 @@ class CardTray(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tray_icon = QSystemTrayIcon(self)
-        # 使用内置图标作为 fallback
-        self.tray_icon.setIcon(QIcon.fromTheme("accessory-text-editor",
-                                                QIcon(":/icons/card.svg")))
+        self.tray_icon.setIcon(_load_icon())
         self.tray_icon.setToolTip("CardNote - 悬浮卡片记事本")
 
         self._build_menu()
