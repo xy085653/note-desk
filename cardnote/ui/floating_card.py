@@ -220,7 +220,7 @@ class FloatingCard(QWidget):
             offset = i * 2
             shadow_rect = rect.adjusted(-offset, -offset, offset, offset)
             shadow_path = QPainterPath()
-            shadow_path.addRoundedRect(QRect(shadow_rect), self.CARD_RADIUS + offset)
+            shadow_path.addRoundedRect(QRect(shadow_rect), self.CARD_RADIUS + offset, self.CARD_RADIUS + offset)
             painter.fillPath(shadow_path, QColor(0, 0, 0, alpha))
 
     def _animate_delete(self):
