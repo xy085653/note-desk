@@ -1,18 +1,41 @@
 import os
-from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QIcon, QAction, QKeySequence
+from PySide6.QtCore import QObject, Signal, Qt
+from PySide6.QtGui import QIcon, QAction, QKeySequence, QPixmap, QPainter, QColor, QPen, QFont
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 
-from cardnote.utils.helpers import resource_path
 
+def _create_tray_icon() -> QIcon:
+    """程序化绘制托盘图标，不依赖外部文件."""
+    pixmap = QPixmap(64, 64)
+    pixmap.fill(Qt.transparent)
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
 
-def _load_icon() -> QIcon:
-    """加载卡片图标，从文件路径加载 SVG."""
-    icon_path = resource_path(os.path.join("ui", "resources", "icons", "card.svg"))
-    if os.path.exists(icon_path):
-        return QIcon(icon_path)
-    # fallback: 使用系统内置图标
-    return QIcon.fromTheme("accessory-text-editor")
+    # 卡片主体：圆角矩形
+    painter.setBrush(QColor(255, 228, 181))
+    painter.setPen(QPen(QColor(232, 200, 138), 2))
+    painter.drawRoundedRect(6, 10, 52, 44, 8, 8)
+
+    # 卡片顶栏
+    painter.setBrush(QColor(255, 214, 153))
+    painter.setPen(Qt.NoPen)
+    painter.drawRoundedRect(6, 10, 52, 10, 8, 8)
+    painter.drawRect(6, 18, 52, 2)
+
+    # 文字线条
+    painter.setPen(QPen(QColor(204, 176, 122), 2))
+    line_y = [28, 36, 44]
+    line_widths = [32, 24, 18]
+    for y, w in zip(line_y, line_widths):
+        painter.drawLine(18, y, 18 + w, y)
+
+    # 右上角红点
+    painter.setBrush(QColor(255, 138, 128))
+    painter.setPen(Qt.NoPen)
+    painter.drawEllipse(48, 14, 8, 8)
+
+    painter.end()
+    return QIcon(pixmap)
 
 
 class CardTray(QObject):
@@ -28,7 +51,7 @@ class CardTray(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(_load_icon())
+        self.tray_icon.setIcon(_create_tray_icon())
         self.tray_icon.setToolTip("CardNote - 悬浮卡片记事本")
 
         self._build_menu()

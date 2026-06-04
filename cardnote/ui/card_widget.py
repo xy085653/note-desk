@@ -18,6 +18,9 @@ class CardWidget(QWidget):
         self.text_edit.setFrameShape(QTextEdit.NoFrame)
         self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 关键：禁止 viewport 绘制默认白色背景，让渐变背景透出来
+        self.text_edit.setAttribute(Qt.WA_TranslucentBackground)
+        self.text_edit.viewport().setAutoFillBackground(False)
         self.text_edit.textChanged.connect(self._on_text_changed)
         layout.addWidget(self.text_edit)
 
