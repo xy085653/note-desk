@@ -99,10 +99,14 @@ class FloatingCard(QWidget):
 
         main_layout.addWidget(self.content_widget)
 
-        # 大小缩放把手
-        self.size_grip = QSizeGrip(self.content_widget)
-        self.size_grip.setFixedSize(16, 16)
-        self.size_grip.setObjectName("sizeGrip")
+        # 大小缩放把手 — 直接挂在 FloatingCard 上，固定在右下角
+        self.size_grip = QSizeGrip(self)
+        self.size_grip.resize(20, 20)
+        self.size_grip.setCursor(Qt.SizeFDiagCursor)
+        self._position_size_grip()
+
+        # 待办项变化时自适应高度
+        self.card_widget.todo_list.items_changed.connect(self._adjust_height)
 
         # 样式
         self._apply_styles()
@@ -277,3 +281,30 @@ class FloatingCard(QWidget):
         if not self._delete_animation or self._delete_animation.state() == QAbstractAnimation.Stopped:
             self.delete_requested.emit(self.card_id)
         super().closeEvent(event)
+
+    def resizeEvent(self, event):
+        """窗口大小变化时重定位缩放把手."""
+        super().resizeEvent(event)
+        self._position_size_grip()
+
+    def _position_size_grip(self):
+        """把缩放把手放在窗口右下角."""
+        if hasattr(self, 'size_grip'):
+            x = self.width() - self.size_grip.width() - 2
+            y = self.height() - self.size_grip.height() - 2
+            self.size_grip.move(x, y)
+
+    def _adjust_height(self):
+        """根据内容自适应高度."""
+        content_height = (
+            self.TITLE_BAR_HEIGHT
+            + self.card_widget.text_edit.document().size().height()
+            + self.card_widget.todo_list.sizeHint().height()
+            + 40  # margins + padding
+        )
+        min_h = 180  # 最小高度
+        desired = max(min_h, int(content_height) + self.SHADOW_MARGIN * 2)
+        current_h = self.height()
+        if abs(desired - current_h) > 10:
+            self.resize(self.width(), desired)
+            self.card_data["height"] = self.width() - self.SHADOW_MARGIN * 2
