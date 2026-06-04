@@ -1,0 +1,43 @@
+/* CardNote 夜间主题 */
+QTextEdit {
+    background: transparent;
+    color: #e0e0e0;
+    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    selection-background-color: #5a7db0;
+    selection-color: white;
+}
+
+QTextEdit:focus {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+QMenu {
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 4px;
+    color: #e0e0e0;
+}
+
+QMenu::item {
+    padding: 8px 24px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+QMenu::item:selected {
+    background: #3d3d3d;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #444;
+    margin: 4px 12px;
+}
+
+QSizeGrip {
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom-right-radius: 8px;
+}
